@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "911127396736",
+    "project_id": "lumenapp-f8404",
+    "storage_bucket": "lumenapp-f8404.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:911127396736:android:41680dae43d8988b564165",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPaR_z2UB8_gwnPOwaEuWDeEQ18vGarX0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
