@@ -1,20 +1,20 @@
-import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/core/providers/auth_provider.dart';
-import 'package:flutter_application_1/core/providers/home_provider.dart';
-import 'package:flutter_application_1/main.dart';
+import 'package:lumen/core/theme/app_colors.dart';
+import 'package:lumen/features/auth/domain/entities/user_entity.dart';
+import 'package:lumen/features/home/providers/home_provider.dart';
+import 'package:lumen/features/auth/authprovider/auth_provider.dart';
 import 'package:provider/provider.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomePageState extends State<HomePage> {
   Future<void> _logout() async {
-    final auth = context.read<AuthProvider>();
+    final auth = context.read<LumenAuthProvider>();
 
     final success = await auth.signOut();
 
@@ -35,12 +35,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final User? user = FirebaseAuth.instance.currentUser;
+    final UserEntity? user = context.watch<LumenAuthProvider>().currentUser;
 
     final String userName = user?.displayName ?? 'Lumen User';
     final String userEmail = user?.email ?? 'No email available';
-    final DateTime? createdAt = user?.metadata.creationTime;
-    final DateTime? lastLogin = user?.metadata.lastSignInTime;
+    final DateTime? createdAt = user?.createdAt;
+    final DateTime? lastLogin = user?.lastSignInAt;
     final bool isEmailVerified = user?.emailVerified ?? false;
 
     return Scaffold(
@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
               iconColor: AppColors.coral,
               iconBg: const Color(0xFFFBE7D2),
               label: 'USER ID',
-              value: user?.uid ?? 'Not signed in',
+              value: user?.id ?? 'Not signed in',
             ),
 
             _DetailTile(
@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             _DetailTile(
               icon: Icons.verified_user_outlined,
-              iconColor: isEmailVerified ? AppColors.green : AppColors.muted,
+              iconColor: isEmailVerified ? AppColors.success : AppColors.muted,
               iconBg: AppColors.cream,
               label: 'EMAIL VERIFIED',
               value: isEmailVerified ? 'Yes' : 'No',
@@ -114,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             _DetailTile(
               icon: Icons.lock_outline_rounded,
-              iconColor: AppColors.green,
+              iconColor: AppColors.success,
               iconBg: AppColors.cream,
               label: 'PASSWORD',
               value: 'Protected',
@@ -140,23 +140,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: _bottomNav(),
     );
-  }
-
-  String getUserName(User? user) {
-    final String? displayName = user?.displayName?.trim();
-
-    if (displayName != null && displayName.isNotEmpty) {
-      return displayName;
-    }
-
-    // If no display name is saved, use the part before @ in the email.
-    final String? email = user?.email;
-
-    if (email != null && email.contains('@')) {
-      return email.split('@').first;
-    }
-
-    return 'Lumen User';
   }
 
   // ------------------------------ Header ------------------------------
@@ -239,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 66,
               child: Row(
                 children: List.generate(labels.length, (index) {
-                  final bool selected = index == homeProvider.navIndex;
+                  final bool selected = index == homeProvider.selectedIndex;
 
                   final Color color = selected
                       ? AppColors.coral
@@ -285,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
 // -----------------------------------------------------------------------------
 
 class _ProfileCard extends StatelessWidget {
-  final User? user;
+  final UserEntity? user;
   final String userName;
   final String userEmail;
   final DateTime? createdAt;
@@ -331,7 +314,7 @@ class _ProfileCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.green, AppColors.green],
+          colors: [AppColors.success, AppColors.success],
         ),
         boxShadow: const [
           BoxShadow(
@@ -705,7 +688,7 @@ class _SessionTile extends StatelessWidget {
               color: AppColors.cream,
               borderRadius: BorderRadius.circular(9),
             ),
-            child: Icon(icon, size: 18, color: AppColors.green),
+            child: Icon(icon, size: 18, color: AppColors.success),
           ),
 
           const SizedBox(width: 12),
@@ -746,7 +729,7 @@ class _SessionTile extends StatelessWidget {
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.circle, size: 7, color: AppColors.green),
+                  Icon(Icons.circle, size: 7, color: AppColors.success),
 
                   SizedBox(width: 4),
 
@@ -755,7 +738,7 @@ class _SessionTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.green,
+                      color: AppColors.success,
                     ),
                   ),
                 ],

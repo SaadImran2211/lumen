@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/core/Components/app_text_field.dart';
-import 'package:flutter_application_1/core/Components/button.dart';
-import 'package:flutter_application_1/core/Components/social_button.dart';
-import 'package:flutter_application_1/core/features/auth/create_account_page.dart';
-import 'package:flutter_application_1/core/providers/auth_provider.dart';
-import 'package:flutter_application_1/main.dart';
+import 'package:lumen/core/Components/app_text_field.dart';
+import 'package:lumen/core/Components/button.dart';
+import 'package:lumen/core/Components/social_button.dart';
+import 'package:lumen/core/theme/app_colors.dart';
+import 'package:lumen/features/auth/authpages/create_account_page.dart';
+import 'package:lumen/features/auth/authprovider/auth_provider.dart';
 import 'package:provider/provider.dart';
 
 class SignInPage extends StatefulWidget {
@@ -21,7 +21,6 @@ class _SignInPageState extends State<SignInPage> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  bool _isLoading = false;
   bool _rememberMe = true;
   bool _submitted = false;
   bool _hidePassword = true;
@@ -34,10 +33,9 @@ class _SignInPageState extends State<SignInPage> {
   // --------------------------------------------------
 
   Future<void> _signIn() async {
-    if (_isLoading) return;
+    if (context.read<LumenAuthProvider>().isLoading) return;
 
     setState(() {
-      _isLoading = true;
       _submitted = true;
       _emailError = null;
       _passwordError = null;
@@ -46,58 +44,22 @@ class _SignInPageState extends State<SignInPage> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    // Validate email
     if (email.isEmpty) {
-      setState(() {
-        _emailError = 'Please enter your email address.';
-      });
+      setState(() => _emailError = 'Please enter your email address.');
     } else if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
-      setState(() {
-        _emailError = 'Please enter a valid email address.';
-      });
+      setState(() => _emailError = 'Please enter a valid email address.');
     }
-
-    // Validate password
     if (password.isEmpty) {
-      setState(() {
-        _passwordError = 'Please enter your password.';
-      });
+      setState(() => _passwordError = 'Please enter your password.');
     }
+    if (_emailError != null || _passwordError != null) return;
 
-    // Stop if validation fails
-    if (_emailError != null || _passwordError != null) {
-      setState(() {
-        _isLoading = false;
-      });
-      return;
-    }
+    final auth = context.read<LumenAuthProvider>();
+    final success = await auth.signIn(email: email, password: password);
 
-    try {
-      final auth = context.read<AuthProvider>();
-
-      final success = await auth.signIn(email: email, password: password);
-
-      if (!mounted) return;
-
-      if (!success) {
-        _showMessage(
-          context,
-          auth.errorMessage ?? 'Invalid email or password.',
-        );
-      }
-
-      // WrapperScreen observes Firebase authStateChanges().
-      // Successful sign-in should automatically display HomeScreen.
-    } catch (e) {
-      if (!mounted) return;
-
-      _showMessage(context, 'Something went wrong. Please try again.');
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    if (!mounted) return;
+    if (!success) {
+      _showMessage(context, auth.errorMessage ?? 'Invalid email or password.');
     }
   }
 
@@ -129,7 +91,7 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = context.watch<AuthProvider>().isLoading;
+    final isLoading = context.watch<LumenAuthProvider>().isLoading;
     final screenWidth = MediaQuery.sizeOf(context).width;
     final screenHeight = MediaQuery.sizeOf(context).height;
 
@@ -353,9 +315,11 @@ class _SignInPageState extends State<SignInPage> {
                             GestureDetector(
                               onTap: () async {
                                 final email = _emailController.text.trim();
-                                final auth = context.read<AuthProvider>();
+                                final auth = context.read<LumenAuthProvider>();
 
-                                final success = await auth.resetPassword(email);
+                                final success = await auth.resetPassword(
+                                  email: email,
+                                );
 
                                 if (!mounted) return;
 

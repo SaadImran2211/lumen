@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application_1/core/utils/global_extensions.dart';
+import 'package:lumen/core/utils/global_extensions.dart';
 
 class CustomAppInputField extends StatelessWidget {
   const CustomAppInputField({

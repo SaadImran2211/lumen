@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/core/utils/global_extensions.dart';
+import 'package:lumen/core/utils/global_extensions.dart';
 
 class AppCustomButton extends StatelessWidget {
   const AppCustomButton({
